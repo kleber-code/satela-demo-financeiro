@@ -23,7 +23,7 @@ export DEBUG=1                      # usa SQLite local (db.sqlite3) e chave de d
 python manage.py migrate
 python manage.py seed_demo          # idempotente; --reset recria; --se-vazio só popula se vazio
 python manage.py runserver
-python manage.py test               # 36 testes
+python manage.py test               # 37 testes
 ```
 
 Abra http://127.0.0.1:8000/ e clique em **Entrar na demonstração**.
