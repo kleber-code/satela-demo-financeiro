@@ -1,0 +1,10 @@
+{% extends "fin/base.html" %}{% load fin_tags %}{% block titulo %}Aging{% endblock %}
+{% block conteudo %}
+<div class="cab"><div class="esp"><h1>Aging de recebíveis e pagáveis</h1><p>Saldos em aberto por faixa de atraso, posição de hoje.</p></div>{% include "fin/_acoes_rel.html" %}</div>
+<div class="grid g2">
+<section class="card"><h2>A receber · {{ ar.total|brl }}</h2><div class="empilhado" role="img" aria-label="Aging a receber">{% for f in ar.faixas %}<b class="f{{ forloop.counter }}" style="width:{{ f.pct|stringformat:'.2f' }}%"></b>{% endfor %}</div>
+<table class="tabela"><thead><tr><th>Faixa</th><th class="n">Títulos</th><th class="n">Valor</th><th class="n">%</th></tr></thead><tbody>{% for f in ar.faixas %}<tr><td><i class="s{{ forloop.counter }}" style="display:inline-block;width:10px;height:10px;border-radius:2px"></i> {{ f.rotulo }}</td><td class="n">{{ f.qtd }}</td><td class="n">{{ f.valor|brl }}</td><td class="n">{{ f.pct|pct }}</td></tr>{% endfor %}</tbody><tfoot><tr><td>Vencido</td><td></td><td class="n neg">{{ ar.vencido|brl }}</td><td></td></tr></tfoot></table></section>
+<section class="card"><h2>A pagar · {{ ap.total|brl }}</h2><div class="empilhado" role="img" aria-label="Aging a pagar">{% for f in ap.faixas %}<b class="f{{ forloop.counter }}" style="width:{{ f.pct|stringformat:'.2f' }}%"></b>{% endfor %}</div>
+<table class="tabela"><thead><tr><th>Faixa</th><th class="n">Títulos</th><th class="n">Valor</th><th class="n">%</th></tr></thead><tbody>{% for f in ap.faixas %}<tr><td>{{ f.rotulo }}</td><td class="n">{{ f.qtd }}</td><td class="n">{{ f.valor|brl }}</td><td class="n">{{ f.pct|pct }}</td></tr>{% endfor %}</tbody><tfoot><tr><td>Vencido</td><td></td><td class="n neg">{{ ap.vencido|brl }}</td><td></td></tr></tfoot></table></section>
+</div>
+{% endblock %}

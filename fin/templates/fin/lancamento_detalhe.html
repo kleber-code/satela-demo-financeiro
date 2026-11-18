@@ -1,0 +1,39 @@
+{% extends "fin/base.html" %}{% load fin_tags %}{% block titulo %}{{ l.descricao }}{% endblock %}
+{% block conteudo %}
+<div class="cab"><div class="esp"><h1>{{ l }}</h1><p>{{ l.get_tipo_display }} · <span class="badge {{ l.situacao }}">{{ l.situacao_label }}</span>{% if l.dias_atraso %} · {{ l.dias_atraso }} dia(s) de atraso{% endif %}{% if l.periodo_fechado %} · <b>período {{ l.competencia|date:"m/Y" }} fechado</b>{% endif %}</p></div>
+  {% if pode_escrever %}
+    {% if l.status == 'aberta' or l.status == 'parcial' %}<a class="btn pri" href="{% url 'lancamento_baixar' l.pk %}">{% if l.tipo == 'R' %}Registrar recebimento{% else %}Registrar pagamento{% endif %}</a>
+      {% if not l.periodo_fechado %}<a class="btn" href="{% url 'lancamento_editar' l.pk %}">Editar</a>{% endif %}{% endif %}
+  {% endif %}
+</div>
+<div class="grid g2">
+<section class="card"><h2>Dados</h2><dl class="det">
+<dt>{% if l.tipo == 'R' %}Cliente{% else %}Fornecedor{% endif %}</dt><dd>{{ l.parceiro|default:"—" }}</dd>
+<dt>Categoria</dt><dd>{{ l.categoria }}</dd><dt>Centro de custo</dt><dd>{{ l.centro_custo|default:"—" }}</dd>
+<dt>Conta prevista</dt><dd>{{ l.conta|default:"—" }}</dd><dt>Vencimento</dt><dd>{{ l.vencimento|date:"d/m/Y" }}</dd>
+<dt>Competência</dt><dd>{{ l.competencia|date:"m/Y" }}</dd><dt>Valor</dt><dd><b>{{ l.valor|brl }}</b></dd>
+<dt>Principal baixado</dt><dd>{{ l.valor_pago|brl }}</dd><dt>Saldo em aberto</dt><dd><b>{{ l.saldo_aberto|brl }}</b></dd>
+{% if l.observacao %}<dt>Observação</dt><dd>{{ l.observacao }}</dd>{% endif %}
+{% if l.anexo %}<dt>Anexo</dt><dd><a href="{% url 'anexo' l.pk %}">Baixar anexo</a></dd>{% endif %}</dl>
+{% if l.status == 'aberta' or l.status == 'parcial' %}{% if juros_hoje or multa_hoje %}<p class="aviso-caixa" style="margin-top:12px">Se pago hoje: multa {{ multa_hoje|brl }} + juros {{ juros_hoje|brl }}.</p>{% endif %}{% endif %}
+{% if pode_escrever and l.status == 'aberta' and not l.periodo_fechado %}
+<form method="post" action="{% url 'lancamento_cancelar' l.pk %}" style="display:inline">{% csrf_token %}<button class="btn peq perigo" data-confirma="Cancelar este lançamento?">Cancelar lançamento</button></form>
+{% if not baixas %}<form method="post" action="{% url 'lancamento_excluir' l.pk %}" style="display:inline">{% csrf_token %}<button class="btn peq perigo" data-confirma="Excluir definitivamente?">Excluir</button></form>{% endif %}{% endif %}
+</section>
+{% if l.tipo == 'R' and l.status == 'aberta' or l.tipo == 'R' and l.status == 'parcial' %}
+<section class="card"><h2>Cobrança <span class="badge vencida">SIMULAÇÃO</span></h2>
+<p>Gere um boleto ou Pix <b>de exemplo</b>. Nada é registrado em banco ou PSP: é apenas uma demonstração do fluxo.</p>
+{% if pode_escrever %}<form method="post" action="{% url 'cobranca_emitir' l.pk %}">{% csrf_token %}<button class="btn" name="tipo" value="boleto">Gerar boleto (simulado)</button> <button class="btn" name="tipo" value="pix">Gerar Pix (simulado)</button></form>{% endif %}
+{% for c in cobrancas %}<p><a href="{% url 'cobranca' c.pk %}">{{ c.get_tipo_display }} simulado de {{ c.valor|brl }} · {{ c.emitida_em|date:"d/m H:i" }}</a></p>{% endfor %}</section>{% endif %}
+</div>
+{% if irmaos %}<section class="card"><h2>Parcelas / recorrência do grupo</h2><div class="rolagem"><table class="tabela"><thead><tr><th>Nº</th><th>Vencimento</th><th class="n">Valor</th><th>Situação</th></tr></thead><tbody>
+{% for i in irmaos %}<tr{% if i.pk == l.pk %} class="sub"{% endif %}><td>{{ i.parcela }}/{{ i.total_parcelas }}</td><td>{{ i.vencimento|date:"d/m/Y" }}</td><td class="n">{{ i.valor|brl }}</td><td><a href="{% url 'lancamento' i.pk %}"><span class="badge {{ i.situacao }}">{{ i.situacao_label }}</span></a></td></tr>{% endfor %}
+</tbody></table></div></section>{% endif %}
+<section class="card"><h2>Baixas</h2><div class="rolagem"><table class="tabela"><thead><tr><th>Data</th><th>Conta</th><th class="n">Principal</th><th class="n">Juros</th><th class="n">Multa</th><th class="n">Desconto</th><th class="n">Total</th><th></th></tr></thead><tbody>
+{% for b in baixas %}<tr><td>{{ b.data|date:"d/m/Y" }}</td><td>{{ b.conta }}</td><td class="n">{{ b.valor_principal|brl }}</td><td class="n">{{ b.juros|brl }}</td><td class="n">{{ b.multa|brl }}</td><td class="n">{{ b.desconto|brl }}</td><td class="n"><b>{{ b.total|brl }}</b></td>
+<td>{% if pode_escrever %}<form method="post" action="{% url 'baixa_estornar' b.pk %}">{% csrf_token %}<button class="btn peq" data-confirma="Estornar esta baixa?">Estornar</button></form>{% endif %}</td></tr>
+{% empty %}<tr><td colspan="8" class="vazio">Nenhuma baixa registrada.</td></tr>{% endfor %}</tbody></table></div></section>
+<section class="card"><h2>Trilha de auditoria</h2>{% for g in logs %}<p class="diff"><b>{{ g.quando|date:"d/m/Y H:i" }}</b> · {{ g.usuario_nome }} · {{ g.acao }} {{ g.modelo }}
+{% for k,v in g.mudancas.items %}{% if g.acao == 'alterou' %}<br>&nbsp;&nbsp;{{ k }}: <del>{{ v.0 }}</del> → <ins>{{ v.1 }}</ins>{% endif %}{% endfor %}</p>{% empty %}<p class="vazio">Sem registros.</p>{% endfor %}
+<a href="{% url 'auditoria' %}?q={{ l.descricao|urlencode }}">Ver trilha completa</a></section>
+{% endblock %}

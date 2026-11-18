@@ -1,0 +1,9 @@
+{% extends "fin/base.html" %}{% block titulo %}Auditoria{% endblock %}
+{% block conteudo %}
+<div class="cab"><div class="esp"><h1>Trilha de auditoria</h1><p>Quem alterou o quê e quando em lançamentos, baixas, transferências, caixas e períodos.</p></div></div>
+<form method="get" class="filtros card"><div><label for="q">Buscar</label><input id="q" class="campo" name="q" value="{{ q }}" type="text"></div>
+<div><label for="modelo">Registro</label><select id="modelo" name="modelo"><option value="">Todos</option>{% for m in modelos %}<option {% if m == modelo %}selected{% endif %}>{{ m }}</option>{% endfor %}</select></div><button class="btn pri">Filtrar</button></form>
+<div class="card"><div class="rolagem"><table class="tabela"><thead><tr><th>Quando</th><th>Quem</th><th>Ação</th><th>Registro</th><th>Mudanças</th></tr></thead><tbody>
+{% for g in pag %}<tr><td>{{ g.quando|date:"d/m/Y H:i" }}</td><td>{{ g.usuario_nome }}</td><td>{{ g.acao }}</td><td>{{ g.modelo }} #{{ g.objeto_id }}<br><small>{{ g.objeto_repr }}</small></td>
+<td class="diff">{% for k,v in g.mudancas.items %}{% if g.acao == 'alterou' %}{{ k }}: <del>{{ v.0|default:"∅" }}</del> → <ins>{{ v.1|default:"∅" }}</ins><br>{% elif g.acao == 'criou' and forloop.counter < 5 %}{{ k }}: {{ v.1 }}<br>{% endif %}{% endfor %}</td></tr>{% empty %}<tr><td colspan="5" class="vazio">Nada encontrado.</td></tr>{% endfor %}</tbody></table></div>{% include "fin/_paginacao.html" %}</div>
+{% endblock %}

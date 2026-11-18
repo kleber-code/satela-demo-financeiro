@@ -1,0 +1,23 @@
+{% extends "fin/base.html" %}{% load fin_tags %}{% block titulo %}Conciliação bancária{% endblock %}
+{% block conteudo %}
+<div class="cab"><div class="esp"><h1>Conciliação bancária</h1><p>Importe o extrato (CSV ou OFX) e confirme os pareamentos sugeridos com as baixas do sistema.</p></div>
+{% if pode_escrever %}<form method="post" action="{% url 'conciliar_auto' %}">{% csrf_token %}<button class="btn" data-confirma="Conciliar automaticamente as sugestões de alta confiança?">Conciliar sugestões automáticas</button></form>{% endif %}</div>
+{% if form %}<form method="post" enctype="multipart/form-data" class="card form filtros" novalidate><h2 style="width:100%">Importar extrato</h2>{% csrf_token %}
+{% for f in form %}<div><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{% if f.help_text %}<div class="ajuda">{{ f.help_text }}</div>{% endif %}{% for e in f.errors %}<div class="erro">{{ e }}</div>{% endfor %}</div>{% endfor %}<button class="btn pri" type="submit">Importar</button></form>{% endif %}
+<nav class="filtros" aria-label="Filtro de status" style="margin-bottom:12px">
+<a class="btn {% if status == 'pendente' %}pri{% endif %}" href="?status=pendente">Pendentes ({{ resumo.pendente }})</a>
+<a class="btn {% if status == 'conciliado' %}pri{% endif %}" href="?status=conciliado">Conciliados ({{ resumo.conciliado }})</a>
+<a class="btn {% if status == 'ignorado' %}pri{% endif %}" href="?status=ignorado">Ignorados ({{ resumo.ignorado }})</a></nav>
+<div class="card"><div class="rolagem"><table class="tabela"><thead><tr><th>Data</th><th>Conta</th><th>Descrição no extrato</th><th class="n">Valor</th><th>Pareamento</th></tr></thead><tbody>
+{% for it in pag %}<tr><td>{{ it.data|date:"d/m/Y" }}</td><td>{{ it.conta }}</td><td>{{ it.descricao }}</td><td class="n {{ it.valor|sinal_cls }}">{{ it.valor|brl }}</td>
+<td>{% if it.status == 'conciliado' %}<span class="badge conciliado">Conciliado</span> <a href="{% url 'lancamento' it.baixa.lancamento_id %}">{{ it.baixa.lancamento.descricao|truncatechars:30 }}</a>
+{% if pode_escrever %}<form method="post" action="{% url 'conciliar_item' it.pk %}" style="display:inline">{% csrf_token %}<button class="btn peq" name="acao" value="desfazer">Desfazer</button></form>{% endif %}
+{% elif it.status == 'ignorado' %}<span class="badge ignorado">Ignorado</span>{% if pode_escrever %} <form method="post" action="{% url 'conciliar_item' it.pk %}" style="display:inline">{% csrf_token %}<button class="btn peq" name="acao" value="desfazer">Reabrir</button></form>{% endif %}
+{% else %}
+ {% for s in it.sug %}<div style="margin-bottom:4px"><span class="badge aberta">sugestão {{ s.score }}%</span> <a href="{% url 'lancamento' s.baixa.lancamento_id %}">{{ s.baixa.lancamento.descricao|truncatechars:30 }}</a> <small>({{ s.baixa.data|date:"d/m" }})</small>
+ {% if pode_escrever %}<form method="post" action="{% url 'conciliar_item' it.pk %}" style="display:inline">{% csrf_token %}<input type="hidden" name="baixa" value="{{ s.baixa.pk }}"><button class="btn peq pri" name="acao" value="conciliar">Conciliar</button></form>{% endif %}</div>
+ {% empty %}{% for l in it.sug_l %}<div><span class="badge parcial">sem baixa</span> <a href="{% url 'lancamento' l.pk %}">{{ l.descricao|truncatechars:30 }}</a> em aberto de mesmo valor {% if pode_escrever %}<a class="btn peq" href="{% url 'lancamento_baixar' l.pk %}?data={{ it.data|date:'Y-m-d' }}&item={{ it.pk }}">Dar baixa e conciliar</a>{% endif %}</div>{% empty %}<small>Sem sugestão.</small>{% endfor %}{% endfor %}
+ {% if pode_escrever %}<form method="post" action="{% url 'conciliar_item' it.pk %}" style="display:inline">{% csrf_token %}<button class="btn peq" name="acao" value="ignorar">Ignorar</button></form>{% endif %}
+{% endif %}</td></tr>{% empty %}<tr><td colspan="5" class="vazio">Nenhum item. Importe um extrato para começar.</td></tr>{% endfor %}</tbody></table></div>{% include "fin/_paginacao.html" %}</div>
+<p class="diff">Formato CSV: <code>data;descricao;valor</code> (datas dd/mm/aaaa ou aaaa-mm-dd; valores como 1.234,56 ou -250,00). Também aceita colunas crédito/débito. Pareamento: mesmo valor com sinal, mesma conta, data até 5 dias de diferença.</p>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "fin/base.html" %}{% load fin_tags %}{% block titulo %}DRE{% endblock %}
+{% block conteudo %}
+<div class="cab"><div class="esp"><h1>DRE — Demonstração do Resultado</h1><p>Competência de {{ ini|date:"m/Y" }} a {{ fim|date:"m/Y" }} · regime de competência; juros e multas pelo regime de caixa.</p></div>{% include "fin/_acoes_rel.html" %}</div>
+{% include "fin/_filtro_periodo.html" %}
+<section class="grid g4"><div class="kpi"><div class="r">Receita bruta</div><div class="v">{{ d.receita_bruta|brl }}</div></div><div class="kpi info"><div class="r">Lucro bruto</div><div class="v">{{ d.lucro_bruto|brl }}</div></div><div class="kpi aviso"><div class="r">Resultado operacional</div><div class="v">{{ d.resultado_operacional|brl }}</div></div><div class="kpi"><div class="r">Resultado líquido</div><div class="v {{ d.resultado_liquido|sinal_cls }}">{{ d.resultado_liquido|brl }}</div><div class="s">margem {{ d.margem_liquida|pct }}</div></div></section>
+<section class="card" style="margin-top:18px"><div class="rolagem"><table class="tabela"><thead><tr><th>Conta</th><th class="n">Valor</th><th class="n">% da receita bruta</th></tr></thead><tbody>
+{% for l in d.linhas %}<tr class="{% if l.tipo == 'subtotal' %}sub{% elif l.tipo == 'total' %}tot{% endif %}"><td>{{ l.rotulo }}</td><td class="n {{ l.valor|sinal_cls }}">{{ l.valor|brl }}</td><td class="n">{{ l.pct|pct }}</td></tr>
+{% for n,v in l.detalhes %}<tr class="det"><td style="padding-left:28px">{{ n }}</td><td class="n">{{ v|brl }}</td><td></td></tr>{% endfor %}{% endfor %}</tbody></table></div></section>
+{% endblock %}

@@ -1,0 +1,6 @@
+{% extends "fin/base.html" %}{% block titulo %}{{ titulo }}{% endblock %}
+{% block conteudo %}
+<div class="cab"><div class="esp"><h1>{{ titulo }}</h1>{% if novo %}<p>Use "Parcelado" para dividir o total (a soma das parcelas é sempre igual ao total) ou "Recorrente" para repetir o valor todo mês.</p>{% endif %}</div></div>
+<form method="post" enctype="multipart/form-data" class="card form" novalidate>{% csrf_token %}{% include "fin/_form.html" %}
+<button class="btn pri" type="submit">Salvar</button> <a class="btn" href="{% if obj %}{% url 'lancamento' obj.pk %}{% elif tipo == 'R' %}{% url 'receber' %}{% else %}{% url 'pagar' %}{% endif %}">Cancelar</a></form>
+{% endblock %}

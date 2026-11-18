@@ -1,0 +1,19 @@
+{% extends "fin/base.html" %}{% block titulo %}Entrar{% endblock %}
+{% block corpo %}
+<div class="login"><main id="conteudo" class="caixa">
+  <div class="marca"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#1b7a55"/><path d="M8 22l5-6 4 3 7-9" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Caixa &amp; Finanças<small>Financeiro e caixa da empresa</small></span></div>
+  {% if messages %}<ul class="msgs" role="alert">{% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}</ul>{% endif %}
+  {% if DEMO_MODE %}
+  <div class="aviso-caixa" role="note">Ambiente de demonstração — dados fictícios. Nenhuma integração financeira real.</div>
+  <form method="post" action="{% url 'entrar_demo' %}">{% csrf_token %}
+    <button class="btn pri" style="width:100%;justify-content:center;font-size:1.05rem;padding:12px" type="submit">Entrar na demonstração (perfil Financeiro)</button>
+    <p style="text-align:center;margin:10px 0"><button class="btn peq" type="submit" name="perfil" value="leitura">Ver como somente leitura</button></p>
+  </form><hr style="border:0;border-top:1px solid var(--borda);margin:16px 0">
+  {% endif %}
+  <form method="post" class="form" novalidate>{% csrf_token %}
+    <div class="linha"><label for="usuario">Usuário</label><input class="campo" id="usuario" name="usuario" type="text" autocomplete="username" required></div>
+    <div class="linha"><label for="senha">Senha</label><input class="campo" id="senha" name="senha" type="password" autocomplete="current-password" required></div>
+    <button class="btn" style="width:100%;justify-content:center" type="submit">Entrar com usuário e senha</button>
+  </form>
+</main></div>
+{% endblock %}

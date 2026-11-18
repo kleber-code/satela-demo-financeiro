@@ -1,0 +1,44 @@
+{% extends "fin/base.html" %}{% load fin_tags %}{% block titulo %}Dashboard{% endblock %}
+{% block conteudo %}
+<div class="cab"><div class="esp"><h1>Visão geral</h1><p>Período dos gráficos: {{ ini|date:"d/m/Y" }} a {{ fim|date:"d/m/Y" }} · hoje {{ hoje|date:"d/m/Y" }}</p></div>
+  {% if pode_escrever %}<a class="btn pri" href="{% url 'lancamento_novo' 'R' %}">+ Conta a receber</a><a class="btn" href="{% url 'lancamento_novo' 'P' %}">+ Conta a pagar</a>{% endif %}
+</div>
+{% include "fin/_filtro_periodo.html" %}
+{% if caixa_aberto %}<div class="aviso-caixa">Caixa aberto: {{ caixa_aberto.conta }} desde {{ caixa_aberto.data|date:"d/m/Y" }}. <a href="{% url 'caixa' caixa_aberto.pk %}">Abrir conferência</a></div>{% endif %}
+<section class="grid g4" aria-label="Indicadores">
+  <div class="kpi"><div class="r">Saldo em contas</div><div class="v {{ saldo|sinal_cls }}">{{ saldo|brl }}</div><div class="s">Soma das contas ativas (cartão = fatura em aberto)</div></div>
+  <div class="kpi info"><div class="r">A receber · 30 dias</div><div class="v">{{ a_receber|brl }}</div><div class="s">vencimentos de hoje até {{ lim30|date:"d/m" }}</div></div>
+  <div class="kpi aviso"><div class="r">A pagar · 30 dias</div><div class="v">{{ a_pagar|brl }}</div><div class="s">{% if ap_venc %}<span class="neg">{{ ap_venc|brl }} já vencido</span>{% else %}compromissos programados{% endif %}</div></div>
+  <div class="kpi alerta"><div class="r">Inadimplência</div><div class="v neg">{{ ina.vencido|brl }}</div><div class="s">{{ ina.pct_carteira|pct }} da carteira a receber · {{ ina.pct_faturamento|pct }} do faturamento 12m</div></div>
+  <div class="kpi"><div class="r">Entradas no mês</div><div class="v">{{ fluxo_mes.entradas|brl }}</div><div class="s">{% if var_entradas is not None %}<span class="{{ var_entradas|sinal_cls }}">{{ var_entradas|pct }}</span> vs. mesmo período do mês anterior{% else %}recebimentos realizados{% endif %}</div></div>
+  <div class="kpi"><div class="r">Saídas no mês</div><div class="v">{{ fluxo_mes.saidas|brl }}</div><div class="s">pagamentos realizados</div></div>
+  <div class="kpi"><div class="r">Resultado do mês (DRE)</div><div class="v {{ dre_mes.resultado_liquido|sinal_cls }}">{{ dre_mes.resultado_liquido|brl }}</div><div class="s">margem líquida {{ dre_mes.margem_liquida|pct }} · competência</div></div>
+  <div class="kpi info"><div class="r">Projeção em 90 dias</div><div class="v {{ proj.saldo_final|sinal_cls }}">{{ proj.saldo_final|brl }}</div><div class="s">menor saldo: {{ proj.menor.saldo|brl }} (sem. de {{ proj.menor.ini|date:"d/m" }})</div></div>
+</section>
+<div class="grid g2" style="margin-top:18px">
+  <section class="card"><h2>Fluxo de caixa realizado</h2>
+    <div class="leg-inline"><span><i class="s1"></i>Entradas</span><span><i class="s2"></i>Saídas</span></div>{{ graf_fluxo }}
+    <p><a href="{% url 'rel_fluxo' %}">Ver fluxo completo, projeção e tabela →</a></p></section>
+  <section class="card"><h2>Saldo projetado · próximos 90 dias</h2>{{ graf_proj }}
+    <p class="diff">Considera contas a pagar/receber em aberto por semana de vencimento; inadimplentes ficam de fora.</p></section>
+</div>
+<div class="grid g3">
+  <section class="card"><h2>Despesas pagas por categoria</h2>
+    {% if rosca %}<div class="flex">{{ rosca }}<ul class="legenda">{% for n,v,p,c in leg %}<li><i class="{{ c }}"></i><span class="n">{{ n }}</span><span class="v">{{ v|brl }} · {{ p|floatformat:0 }}%</span></li>{% endfor %}</ul></div>{% else %}<p class="vazio">Sem pagamentos no período.</p>{% endif %}</section>
+  <section class="card"><h2>Aging a receber</h2>
+    <div class="empilhado" role="img" aria-label="Distribuição do a receber por faixa de atraso">{% for f in aging.faixas %}<b class="f{{ forloop.counter }}" style="width:{{ f.pct|stringformat:'.2f' }}%" title="{{ f.rotulo }}: {{ f.valor|brl }}"></b>{% endfor %}</div>
+    <ul class="legenda">{% for f in aging.faixas %}<li><i class="f{{ forloop.counter }}"></i>{{ f.rotulo }}<span class="v">{{ f.valor|brl }}</span></li>{% endfor %}</ul>
+    <p><a href="{% url 'rel_aging' %}">Aging completo →</a></p></section>
+  <section class="card"><h2>Top clientes no período</h2>
+    {% for c in top_clientes %}<div class="hbar"><div class="t"><span>{{ c.nome }}</span><b>{{ c.total|brl }}</b></div><div class="trilho"><b style="width:{% widthratio c.total max_cliente 100 %}%"></b></div></div>{% empty %}<p class="vazio">Sem dados.</p>{% endfor %}
+    <p><a href="{% url 'rel_ranking' %}">Ranking completo →</a></p></section>
+</div>
+<div class="grid g2">
+  <section class="card"><h2>Próximos recebimentos</h2><div class="rolagem"><table class="tabela"><tbody>
+    {% for l in prox_r %}<tr><td>{{ l.vencimento|date:"d/m" }}</td><td><a href="{% url 'lancamento' l.pk %}">{{ l.descricao|truncatechars:34 }}</a><br><small>{{ l.parceiro }}</small></td><td class="n">{{ l.saldo_aberto|brl }}</td><td><span class="badge {{ l.situacao }}">{{ l.situacao_label }}</span></td></tr>{% endfor %}</tbody></table></div></section>
+  <section class="card"><h2>Próximos pagamentos</h2><div class="rolagem"><table class="tabela"><tbody>
+    {% for l in prox_p %}<tr><td>{{ l.vencimento|date:"d/m" }}</td><td><a href="{% url 'lancamento' l.pk %}">{{ l.descricao|truncatechars:34 }}</a><br><small>{{ l.parceiro }}</small></td><td class="n">{{ l.saldo_aberto|brl }}</td><td><span class="badge {{ l.situacao }}">{{ l.situacao_label }}</span></td></tr>{% endfor %}</tbody></table></div></section>
+</div>
+<section class="card"><h2>Saldo por conta</h2><div class="rolagem"><table class="tabela"><thead><tr><th>Conta</th><th>Tipo</th><th class="n">Saldo</th></tr></thead><tbody>
+{% for c,s in contas_saldo %}<tr><td>{{ c.nome }}</td><td>{{ c.get_tipo_display }}</td><td class="n {{ s|sinal_cls }}">{{ s|brl }}</td></tr>{% endfor %}</tbody></table></div></section>
+{% endblock %}

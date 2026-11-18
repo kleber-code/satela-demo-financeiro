@@ -1,0 +1,11 @@
+{% extends "fin/base.html" %}{% load fin_tags %}{% block titulo %}Top clientes e fornecedores{% endblock %}
+{% block conteudo %}
+<div class="cab"><div class="esp"><h1>Top clientes e fornecedores</h1><p>Por competência, {{ ini|date:"d/m/Y" }} a {{ fim|date:"d/m/Y" }}.</p></div>{% include "fin/_acoes_rel.html" %}</div>
+{% include "fin/_filtro_periodo.html" %}
+<div class="grid g2">
+<section class="card"><h2>Clientes · {{ tc|brl }}</h2>{% for x in cli %}<div class="hbar"><div class="t"><span>{{ forloop.counter }}. {{ x.nome }}</span><b>{{ x.total|brl }} <small>({{ x.pct|pct }})</small></b></div><div class="trilho"><b style="width:{{ x.pct|stringformat:'.0f' }}%"></b></div></div>{% empty %}<p class="vazio">Sem dados.</p>{% endfor %}</section>
+<section class="card"><h2>Fornecedores · {{ tf|brl }}</h2>{% for x in forn %}<div class="hbar"><div class="t"><span>{{ forloop.counter }}. {{ x.nome }}</span><b>{{ x.total|brl }} <small>({{ x.pct|pct }})</small></b></div><div class="trilho"><b style="width:{{ x.pct|stringformat:'.0f' }}%;background:var(--c2)"></b></div></div>{% empty %}<p class="vazio">Sem dados.</p>{% endfor %}</section></div>
+<div class="grid g2">
+<section class="card"><h2>Detalhe de clientes</h2><div class="rolagem"><table class="tabela"><thead><tr><th>Cliente</th><th class="n">Total</th><th class="n">Pago</th><th class="n">Em aberto</th></tr></thead><tbody>{% for x in cli %}<tr><td>{{ x.nome }}</td><td class="n">{{ x.total|brl }}</td><td class="n">{{ x.pago|brl }}</td><td class="n">{{ x.aberto|brl }}</td></tr>{% endfor %}</tbody></table></div></section>
+<section class="card"><h2>Detalhe de fornecedores</h2><div class="rolagem"><table class="tabela"><thead><tr><th>Fornecedor</th><th class="n">Total</th><th class="n">Pago</th><th class="n">Em aberto</th></tr></thead><tbody>{% for x in forn %}<tr><td>{{ x.nome }}</td><td class="n">{{ x.total|brl }}</td><td class="n">{{ x.pago|brl }}</td><td class="n">{{ x.aberto|brl }}</td></tr>{% endfor %}</tbody></table></div></section></div>
+{% endblock %}

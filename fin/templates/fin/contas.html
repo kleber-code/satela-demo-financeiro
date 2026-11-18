@@ -1,0 +1,6 @@
+{% extends "fin/base.html" %}{% load fin_tags %}{% block titulo %}Contas financeiras{% endblock %}
+{% block conteudo %}
+<div class="cab"><div class="esp"><h1>Contas financeiras</h1><p>Saldo consolidado: <b>{{ total|brl }}</b></p></div>{% if pode_escrever %}<a class="btn pri" href="{% url 'conta_nova' %}">+ Nova conta</a>{% endif %}</div>
+<div class="card"><div class="rolagem"><table class="tabela"><thead><tr><th>Conta</th><th>Tipo</th><th>Instituição</th><th class="n">Saldo inicial</th><th class="n">Saldo atual</th><th></th></tr></thead><tbody>
+{% for c,s in linhas %}<tr><td>{{ c.nome }}{% if not c.ativa %} <span class="badge cancelada">inativa</span>{% endif %}</td><td>{{ c.get_tipo_display }}</td><td>{{ c.instituicao }}</td><td class="n">{{ c.saldo_inicial|brl }}</td><td class="n {{ s|sinal_cls }}"><b>{{ s|brl }}</b></td><td>{% if pode_escrever %}<a href="{% url 'conta_editar' c.pk %}">Editar</a>{% endif %}</td></tr>{% endfor %}</tbody></table></div></div>
+{% endblock %}

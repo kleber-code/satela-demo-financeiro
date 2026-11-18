@@ -1,0 +1,12 @@
+{% extends "fin/base.html" %}{% block titulo %}Relatórios{% endblock %}
+{% block conteudo %}
+<div class="cab"><div class="esp"><h1>Relatórios</h1><p>Todos com exportação CSV e versão para impressão/PDF.</p></div></div>
+<div class="cards-rel">
+<a href="{% url 'rel_fluxo' %}"><b>Fluxo de caixa</b><span>Realizado por mês e projetado para os próximos 90 dias.</span></a>
+<a href="{% url 'rel_dre' %}"><b>DRE</b><span>Demonstração do resultado por período, por competência.</span></a>
+<a href="{% url 'rel_aging' %}"><b>Aging</b><span>Contas a receber e a pagar por faixa de atraso.</span></a>
+<a href="{% url 'rel_inadimplencia' %}"><b>Inadimplência</b><span>Vencidos, % da carteira e maiores devedores.</span></a>
+<a href="{% url 'rel_ranking' %}"><b>Top clientes e fornecedores</b><span>Concentração de receitas e despesas.</span></a>
+<a href="{% url 'rel_comparativo' %}"><b>Comparativo mês a mês</b><span>Receitas, despesas e resultado com variação.</span></a>
+</div>
+{% endblock %}

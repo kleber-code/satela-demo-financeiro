@@ -1,0 +1,14 @@
+{% extends "fin/base.html" %}{% load fin_tags %}{% block titulo %}Inadimplência{% endblock %}
+{% block conteudo %}
+<div class="cab"><div class="esp"><h1>Inadimplência</h1><p>Contas a receber vencidas e não pagas.</p></div>{% include "fin/_acoes_rel.html" %}</div>
+<section class="grid g4"><div class="kpi alerta"><div class="r">Total vencido</div><div class="v neg">{{ i.vencido|brl }}</div></div>
+<div class="kpi aviso"><div class="r">% da carteira em aberto</div><div class="v">{{ i.pct_carteira|pct }}</div></div>
+<div class="kpi info"><div class="r">% do faturamento 12m</div><div class="v">{{ i.pct_faturamento|pct }}</div><div class="s">base: {{ i.faturamento_12m|brl }}</div></div>
+<div class="kpi"><div class="r">Clientes em atraso</div><div class="v">{{ i.devedores|length }}</div></div></section>
+<div class="grid g2" style="margin-top:18px">
+<section class="card"><h2>Maiores devedores</h2><div class="rolagem"><table class="tabela"><thead><tr><th>Cliente</th><th class="n">Títulos</th><th class="n">Maior atraso</th><th class="n">Vencido</th></tr></thead><tbody>{% for d in i.devedores|slice:":10" %}<tr><td>{{ d.nome }}</td><td class="n">{{ d.qtd }}</td><td class="n">{{ d.max_dias }}d</td><td class="n neg">{{ d.valor|brl }}</td></tr>{% empty %}<tr><td colspan="4" class="vazio">Sem inadimplência.</td></tr>{% endfor %}</tbody></table></div></section>
+<section class="card"><h2>Por faixa de atraso</h2><div class="empilhado">{% for f in i.aging.faixas %}<b class="f{{ forloop.counter }}" style="width:{{ f.pct|stringformat:'.2f' }}%"></b>{% endfor %}</div>
+<ul class="legenda">{% for f in i.aging.faixas %}<li><i class="f{{ forloop.counter }}"></i>{{ f.rotulo }} ({{ f.qtd }})<span class="v">{{ f.valor|brl }}</span></li>{% endfor %}</ul></section></div>
+<section class="card"><h2>Títulos vencidos</h2><div class="rolagem"><table class="tabela"><thead><tr><th>Vencimento</th><th>Cliente</th><th>Descrição</th><th class="n">Dias</th><th class="n">Saldo</th></tr></thead><tbody>
+{% for l in pag %}<tr><td>{{ l.vencimento|date:"d/m/Y" }}</td><td>{{ l.parceiro }}</td><td><a href="{% url 'lancamento' l.pk %}">{{ l.descricao }}</a></td><td class="n">{{ l.dias_atraso }}</td><td class="n neg">{{ l.saldo_aberto|brl }}</td></tr>{% empty %}<tr><td colspan="5" class="vazio">Nada vencido.</td></tr>{% endfor %}</tbody></table></div>{% include "fin/_paginacao.html" %}</section>
+{% endblock %}

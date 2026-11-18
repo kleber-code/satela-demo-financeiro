@@ -1,0 +1,6 @@
+<form method="get" class="filtros card no-print" aria-label="Filtros">
+  {% for f in form %}<div><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}</div>{% endfor %}
+  {{ extra }}
+  <button class="btn pri" type="submit">Filtrar</button>
+  <a class="btn" href="?">Limpar</a>
+</form>

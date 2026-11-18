@@ -1,0 +1,10 @@
+{% extends "fin/base.html" %}{% block titulo %}Plano de contas{% endblock %}
+{% block conteudo %}
+<div class="cab"><div class="esp"><h1>Plano de contas</h1><p>Categorias de receita/despesa agrupadas para a DRE e centros de custo.</p></div></div>
+<div class="grid g2">
+<section class="card"><h2>Categorias</h2>{% if pode_escrever %}<p><a class="btn peq" href="{% url 'categoria_nova' %}">+ Categoria</a></p>{% endif %}<div class="rolagem"><table class="tabela"><thead><tr><th>Código</th><th>Nome</th><th>Tipo</th><th>Grupo da DRE</th><th></th></tr></thead><tbody>
+{% for c in categorias %}<tr><td>{{ c.codigo }}</td><td>{{ c.nome }}{% if not c.ativo %} <span class="badge cancelada">inativa</span>{% endif %}</td><td>{{ c.get_tipo_display }}</td><td><small>{{ c.get_grupo_display }}</small></td><td>{% if pode_escrever %}<a href="{% url 'categoria_editar' c.pk %}">Editar</a>{% endif %}</td></tr>{% endfor %}</tbody></table></div></section>
+<section class="card"><h2>Centros de custo</h2>{% if pode_escrever %}<p><a class="btn peq" href="{% url 'centro_novo' %}">+ Centro de custo</a></p>{% endif %}<table class="tabela"><thead><tr><th>Código</th><th>Nome</th><th></th></tr></thead><tbody>
+{% for c in centros %}<tr><td>{{ c.codigo }}</td><td>{{ c.nome }}</td><td>{% if pode_escrever %}<a href="{% url 'centro_editar' c.pk %}">Editar</a>{% endif %}</td></tr>{% endfor %}</tbody></table></section>
+</div>
+{% endblock %}

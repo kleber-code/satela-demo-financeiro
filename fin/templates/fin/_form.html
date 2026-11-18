@@ -1,0 +1,11 @@
+{% if form.non_field_errors %}<div class="erro" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+<div class="form-grade">
+{% for f in form %}
+  <div class="linha">
+    <label for="{{ f.id_for_label }}">{{ f.label }}{% if f.field.required %} *{% endif %}</label>
+    {{ f }}
+    {% if f.help_text %}<div class="ajuda">{{ f.help_text }}</div>{% endif %}
+    {% for e in f.errors %}<div class="erro">{{ e }}</div>{% endfor %}
+  </div>
+{% endfor %}
+</div>

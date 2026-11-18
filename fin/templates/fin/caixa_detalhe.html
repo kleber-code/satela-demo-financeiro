@@ -1,0 +1,22 @@
+{% extends "fin/base.html" %}{% load fin_tags %}{% block titulo %}Caixa {{ s.data|date:"d/m/Y" }}{% endblock %}
+{% block conteudo %}
+<div class="cab"><div class="esp"><h1>{{ s.conta }} · {{ s.data|date:"d/m/Y" }}</h1><p><span class="badge {{ s.status }}">{{ s.get_status_display }}</span> · aberto por {{ s.aberto_por|default:"—" }}{% if s.fechado_por %} · fechado por {{ s.fechado_por }} em {{ s.fechado_em|date:"d/m/Y H:i" }}{% endif %}</p></div>
+<button class="btn no-print" data-imprimir>Imprimir / PDF</button>
+{% if pode_escrever and s.status == 'aberto' %}<a class="btn pri" href="{% url 'caixa_fechar' s.pk %}">Conferir e fechar caixa</a>{% endif %}</div>
+<section class="grid g4">
+<div class="kpi"><div class="r">Abertura</div><div class="v">{{ s.valor_abertura|brl }}</div></div>
+<div class="kpi info"><div class="r">Recebimentos</div><div class="v">{{ r.recebimentos|brl }}</div></div>
+<div class="kpi aviso"><div class="r">Pagamentos</div><div class="v">{{ r.pagamentos|brl }}</div></div>
+<div class="kpi"><div class="r">Esperado em caixa</div><div class="v">{{ r.esperado|brl }}</div><div class="s">abertura + rec. − pag. + suprimentos − sangrias</div></div>
+{% if s.status == 'fechado' %}<div class="kpi"><div class="r">Contado</div><div class="v">{{ s.valor_contado|brl }}</div></div>
+<div class="kpi {% if s.diferenca %}alerta{% endif %}"><div class="r">Diferença</div><div class="v {{ s.diferenca|sinal_cls }}">{{ s.diferenca|brl }}</div><div class="s">{% if s.diferenca > 0 %}sobra{% elif s.diferenca < 0 %}falta{% else %}caixa batido{% endif %}</div></div>{% endif %}
+</section>
+<div class="grid g2" style="margin-top:18px">
+<section class="card"><h2>Sangrias e suprimentos</h2>
+<table class="tabela"><tbody>{% for m in movs %}<tr><td>{{ m.criado_em|date:"H:i" }}</td><td>{{ m.get_tipo_display }}</td><td>{{ m.motivo }}{% if m.contraparte %} <small>({{ m.contraparte }})</small>{% endif %}</td><td class="n">{{ m.valor|brl }}</td></tr>{% empty %}<tr><td class="vazio">Nenhum movimento.</td></tr>{% endfor %}</tbody></table>
+{% if form %}<form method="post" class="form no-print" style="margin-top:14px" novalidate>{% csrf_token %}{% include "fin/_form.html" %}<button class="btn pri" type="submit">Registrar movimento</button></form>{% endif %}</section>
+<section class="card"><h2>Baixas do dia neste caixa</h2><div class="rolagem"><table class="tabela"><tbody>{% for b in baixas %}<tr><td><a href="{% url 'lancamento' b.lancamento_id %}">{{ b.lancamento.descricao|truncatechars:34 }}</a></td><td>{{ b.lancamento.get_tipo_display }}</td><td class="n {% if b.lancamento.tipo == 'P' %}neg{% else %}pos{% endif %}">{{ b.valor_assinado|brl }}</td></tr>{% empty %}<tr><td class="vazio">Sem baixas no dia.</td></tr>{% endfor %}</tbody></table></div></section>
+</div>
+{% if s.status == 'fechado' %}<div class="grid g2"><section class="card"><h2>Conferência de valores</h2>{% if contagem %}<table class="tabela"><thead><tr><th>Cédula/moeda</th><th class="n">Qtd.</th><th class="n">Subtotal</th></tr></thead><tbody>{% for d,q,t in contagem %}<tr><td>R$ {{ d|num }}</td><td class="n">{{ q }}</td><td class="n">{{ t|brl }}</td></tr>{% endfor %}</tbody></table>{% else %}<p class="vazio">Valor total informado manualmente.</p>{% endif %}{% if s.observacao %}<p><b>Observação:</b> {{ s.observacao }}</p>{% endif %}</section>
+<section class="card"><h2>Auditoria do fechamento</h2>{% for g in logs %}<p class="diff"><b>{{ g.quando|date:"d/m/Y H:i" }}</b> · {{ g.usuario_nome }} · {{ g.acao }}</p>{% empty %}<p class="vazio">Sem registros.</p>{% endfor %}</section></div>{% endif %}
+{% endblock %}

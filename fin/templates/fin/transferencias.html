@@ -1,0 +1,7 @@
+{% extends "fin/base.html" %}{% load fin_tags %}{% block titulo %}Transferências{% endblock %}
+{% block conteudo %}
+<div class="cab"><div class="esp"><h1>Transferências entre contas</h1><p>Movimentam saldo entre contas sem afetar receitas ou despesas.</p></div></div>
+{% if form %}<form method="post" class="card form" novalidate><h2>Nova transferência</h2>{% csrf_token %}{% include "fin/_form.html" %}<button class="btn pri" type="submit">Transferir</button></form>{% endif %}
+<div class="card"><div class="rolagem"><table class="tabela"><thead><tr><th>Data</th><th>Origem</th><th>Destino</th><th>Descrição</th><th class="n">Valor</th></tr></thead><tbody>
+{% for t in pag %}<tr><td>{{ t.data|date:"d/m/Y" }}</td><td>{{ t.origem }}</td><td>{{ t.destino }}</td><td>{{ t.descricao }}</td><td class="n">{{ t.valor|brl }}</td></tr>{% empty %}<tr><td colspan="5" class="vazio">Nenhuma transferência.</td></tr>{% endfor %}</tbody></table></div>{% include "fin/_paginacao.html" %}</div>
+{% endblock %}

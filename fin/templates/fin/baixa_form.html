@@ -1,0 +1,11 @@
+{% extends "fin/base.html" %}{% load fin_tags %}{% block titulo %}Baixa{% endblock %}
+{% block conteudo %}
+<div class="cab"><div class="esp"><h1>{% if l.tipo == 'R' %}Registrar recebimento{% else %}Registrar pagamento{% endif %}</h1>
+<p>{{ l }} · vencimento {{ l.vencimento|date:"d/m/Y" }} · saldo em aberto <b>{{ l.saldo_aberto|brl }}</b>{% if dias_atraso %} · <span class="neg">{{ dias_atraso }} dia(s) de atraso</span>{% endif %}</p></div></div>
+<form method="post" class="card form" novalidate>{% csrf_token %}{% if item %}<input type="hidden" name="item" value="{{ item.pk }}">{% endif %}
+{% include "fin/_form.html" %}
+<p class="ajuda">Baixa parcial: informe um principal menor que o saldo; o restante continua em aberto. Multa de 2% + juros de 1% ao mês (pro rata dia) são sugeridos quando há atraso — altere livremente.</p>
+<button class="btn pri" type="submit">Confirmar baixa</button>
+<button class="btn" type="submit" name="recalcular" value="1">Recalcular encargos pela data/valor</button>
+<a class="btn" href="{% url 'lancamento' l.pk %}">Cancelar</a></form>
+{% endblock %}

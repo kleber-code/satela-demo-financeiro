@@ -1,0 +1,8 @@
+{% extends "fin/base.html" %}{% block titulo %}Fechamento de períodos{% endblock %}
+{% block conteudo %}
+<div class="cab"><div class="esp"><h1>Fechamento de períodos</h1><p>Em período fechado, lançamentos, baixas e transferências ficam imutáveis (apenas leitura). Somente administradores reabrem.</p></div></div>
+<div class="card"><table class="tabela"><thead><tr><th>Mês</th><th>Situação</th><th>Fechado por</th><th></th></tr></thead><tbody>
+{% for m in meses %}<tr><td>{{ m.d|date:"F/Y" }}</td><td>{% if m.p %}<span class="badge fechado">Fechado</span>{% else %}<span class="badge aberto">Aberto</span>{% endif %}</td><td>{% if m.p %}{{ m.p.fechado_por|default:"—" }} em {{ m.p.fechado_em|date:"d/m/Y" }}{% endif %}</td>
+<td>{% if m.p %}{% if eh_admin %}<form method="post" action="{% url 'periodo_reabrir' %}">{% csrf_token %}<input type="hidden" name="ano" value="{{ m.d.year }}"><input type="hidden" name="mes" value="{{ m.d.month }}"><button class="btn peq" data-confirma="Reabrir este período?">Reabrir</button></form>{% endif %}
+{% elif pode_escrever %}<form method="post" action="{% url 'periodo_fechar' %}">{% csrf_token %}<input type="hidden" name="ano" value="{{ m.d.year }}"><input type="hidden" name="mes" value="{{ m.d.month }}"><button class="btn peq" data-confirma="Fechar o período? Os lançamentos ficarão imutáveis.">Fechar período</button></form>{% endif %}</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

@@ -1,0 +1,8 @@
+{% extends "fin/base.html" %}{% load fin_tags %}{% block titulo %}Comparativo mensal{% endblock %}
+{% block conteudo %}
+<div class="cab"><div class="esp"><h1>Comparativo mês a mês</h1><p>Últimos 12 meses por competência, com entradas e saídas efetivas de caixa.</p></div>{% include "fin/_acoes_rel.html" %}</div>
+<div class="grid g2"><section class="card"><h2>Receitas × despesas</h2><div class="leg-inline"><span><i class="s1"></i>Receitas</span><span><i class="s2"></i>Despesas</span></div>{{ g }}</section>
+<section class="card"><h2>Resultado do mês</h2>{{ g2 }}</section></div>
+<section class="card"><div class="rolagem"><table class="tabela"><thead><tr><th>Mês</th><th class="n">Receitas</th><th class="n">Var. receita</th><th class="n">Despesas</th><th class="n">Resultado</th><th class="n">Entradas (caixa)</th><th class="n">Saídas (caixa)</th></tr></thead><tbody>
+{% for l in linhas %}<tr><td>{{ l.mes|mes }}</td><td class="n">{{ l.receitas|brl }}</td><td class="n {{ l.var_receita|sinal_cls }}">{{ l.var_receita|pct }}</td><td class="n">{{ l.despesas|brl }}</td><td class="n {{ l.resultado|sinal_cls }}"><b>{{ l.resultado|brl }}</b></td><td class="n">{{ l.caixa_entradas|brl }}</td><td class="n">{{ l.caixa_saidas|brl }}</td></tr>{% endfor %}</tbody></table></div></section>
+{% endblock %}

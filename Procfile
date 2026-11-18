@@ -1,0 +1,2 @@
+release: python manage.py migrate --noinput && python manage.py seed_demo --se-vazio
+web: gunicorn config.wsgi --bind 0.0.0.0:${PORT:-8000} --workers 2

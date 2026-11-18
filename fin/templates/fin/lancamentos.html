@@ -1,0 +1,17 @@
+{% extends "fin/base.html" %}{% load fin_tags %}{% block titulo %}{{ titulo }}{% endblock %}
+{% block conteudo %}
+<div class="cab"><div class="esp"><h1>{{ titulo }}</h1><p>{{ pag.paginator.count }} lançamento(s) · total {{ total|brl }} · já baixado {{ total_pago|brl }}</p></div>
+  <a class="btn no-print" href="{% qs formato='csv' pagina='' %}">Exportar CSV</a>
+  {% if pode_escrever %}<a class="btn pri" href="{% url 'lancamento_novo' tipo %}">+ Novo lançamento</a>{% endif %}</div>
+<form method="get" class="filtros card no-print">
+  {% for f in form %}<div><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}</div>{% endfor %}
+  <button class="btn pri" type="submit">Filtrar</button><a class="btn" href="?situacao=">Ver todas</a></form>
+<div class="card"><div class="rolagem"><table class="tabela">
+<thead><tr><th>Vencimento</th><th>Descrição</th><th>{% if tipo == 'R' %}Cliente{% else %}Fornecedor{% endif %}</th><th>Categoria</th><th class="n">Valor</th><th class="n">Saldo</th><th>Situação</th></tr></thead><tbody>
+{% for l in pag %}<tr><td>{{ l.vencimento|date:"d/m/Y" }}</td>
+<td><a href="{% url 'lancamento' l.pk %}">{{ l.descricao }}</a>{% if l.total_parcelas > 1 %} <small>({{ l.parcela }}/{{ l.total_parcelas }}{% if l.recorrente %} · recorrente{% endif %})</small>{% endif %}</td>
+<td>{{ l.parceiro|default:"—" }}</td><td>{{ l.categoria.nome }}</td><td class="n">{{ l.valor|brl }}</td><td class="n">{{ l.saldo_aberto|brl }}</td>
+<td><span class="badge {{ l.situacao }}">{{ l.situacao_label }}</span>{% if l.dias_atraso %} <small class="neg">{{ l.dias_atraso }}d</small>{% endif %}</td></tr>
+{% empty %}<tr><td colspan="7" class="vazio">Nenhum lançamento com esses filtros.</td></tr>{% endfor %}
+</tbody></table></div>{% include "fin/_paginacao.html" %}</div>
+{% endblock %}

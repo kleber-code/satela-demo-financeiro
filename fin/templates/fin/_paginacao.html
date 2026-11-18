@@ -1,0 +1,6 @@
+{% load fin_tags %}{% if pag.paginator.num_pages > 1 %}
+<nav class="pag" aria-label="Paginação">
+  {% if pag.has_previous %}<a href="{% qs pagina=pag.previous_page_number %}">‹ Anterior</a>{% endif %}
+  <span class="atual" aria-current="page">Página {{ pag.number }} de {{ pag.paginator.num_pages }}</span>
+  {% if pag.has_next %}<a href="{% qs pagina=pag.next_page_number %}">Próxima ›</a>{% endif %}
+</nav>{% endif %}

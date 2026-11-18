@@ -1,0 +1,8 @@
+{% extends "fin/base.html" %}{% block titulo %}Clientes e fornecedores{% endblock %}
+{% block conteudo %}
+<div class="cab"><div class="esp"><h1>Clientes e fornecedores</h1><p>{{ pag.paginator.count }} cadastro(s). Dados fictícios.</p></div>{% if pode_escrever %}<a class="btn pri" href="{% url 'parceiro_novo' %}">+ Novo</a>{% endif %}</div>
+<form method="get" class="filtros card"><div><label for="q">Buscar</label><input id="q" class="campo" name="q" value="{{ q }}" type="text"></div>
+<div><label for="tipo">Tipo</label><select id="tipo" name="tipo"><option value="">Todos</option><option value="cliente" {% if t == 'cliente' %}selected{% endif %}>Clientes</option><option value="fornecedor" {% if t == 'fornecedor' %}selected{% endif %}>Fornecedores</option></select></div><button class="btn pri">Filtrar</button></form>
+<div class="card"><div class="rolagem"><table class="tabela"><thead><tr><th>Nome</th><th>Tipo</th><th>Documento</th><th>E-mail</th><th>Telefone</th><th></th></tr></thead><tbody>
+{% for p in pag %}<tr><td>{{ p.nome }}</td><td>{{ p.get_tipo_display }}</td><td>{{ p.documento }}</td><td>{{ p.email }}</td><td>{{ p.telefone }}</td><td>{% if pode_escrever %}<a href="{% url 'parceiro_editar' p.pk %}">Editar</a>{% endif %}</td></tr>{% empty %}<tr><td colspan="6" class="vazio">Nada encontrado.</td></tr>{% endfor %}</tbody></table></div>{% include "fin/_paginacao.html" %}</div>
+{% endblock %}

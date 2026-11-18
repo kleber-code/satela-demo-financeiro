@@ -1,0 +1,10 @@
+{% extends "fin/base.html" %}{% load fin_tags %}{% block titulo %}Caixa do dia{% endblock %}
+{% block conteudo %}
+<div class="cab"><div class="esp"><h1>Caixa do dia</h1><p>Abertura, sangria/suprimento, conferência de valores e fechamento com diferença.</p></div></div>
+{% for s in aberto %}<div class="aviso-caixa">Caixa aberto: <b>{{ s.conta }}</b> · {{ s.data|date:"d/m/Y" }} · abertura {{ s.valor_abertura|brl }} — <a href="{% url 'caixa' s.pk %}">continuar</a></div>{% endfor %}
+{% if form %}<form method="post" class="card form filtros" novalidate><h2 style="width:100%">Abrir caixa</h2>{% csrf_token %}
+{% for f in form %}<div><label for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}{% for e in f.errors %}<div class="erro">{{ e }}</div>{% endfor %}</div>{% endfor %}<button class="btn pri" type="submit">Abrir caixa</button>
+<p class="ajuda" style="width:100%">A abertura usa o saldo contábil do caixa no fim do dia anterior.</p></form>{% endif %}
+<div class="card"><h2>Histórico de caixas</h2><div class="rolagem"><table class="tabela"><thead><tr><th>Data</th><th>Caixa</th><th>Status</th><th class="n">Abertura</th><th class="n">Esperado</th><th class="n">Contado</th><th class="n">Diferença</th><th>Fechado por</th></tr></thead><tbody>
+{% for s in pag %}<tr><td><a href="{% url 'caixa' s.pk %}">{{ s.data|date:"d/m/Y" }}</a></td><td>{{ s.conta }}</td><td><span class="badge {{ s.status }}">{{ s.get_status_display }}</span></td><td class="n">{{ s.valor_abertura|brl }}</td><td class="n">{{ s.valor_esperado|brl }}</td><td class="n">{{ s.valor_contado|brl }}</td><td class="n {{ s.diferenca|sinal_cls }}">{{ s.diferenca|brl }}</td><td>{{ s.fechado_por|default:"—" }}</td></tr>{% empty %}<tr><td colspan="8" class="vazio">Nenhum caixa aberto ainda.</td></tr>{% endfor %}</tbody></table></div>{% include "fin/_paginacao.html" %}</div>
+{% endblock %}
